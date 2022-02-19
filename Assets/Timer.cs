@@ -28,6 +28,7 @@ public class Timer : MonoBehaviour
     [SerializeField] public List<float> _zamanlar; // zamanları tutan liste
     [SerializeField] public bool _zamanlayıcıGörünüm;
     [SerializeField] public int _çözümSayısı;
+    [SerializeField] public float _redlineLimit;
     #endregion
     
     #region UI Elemanları
@@ -79,7 +80,7 @@ public class Timer : MonoBehaviour
             if (zaman == _zamanlar.Min()){ // zaman = eniyizaman
                 _zamanListesi.text += $"<color=#00ff00>({çözümIndex}) {ZamanıSaateÇevir(zaman)}</color>";
             }
-            else if (eniyiZaman < zaman && zaman < 20){ // eniyizaman<zaman<20
+            else if (eniyiZaman < zaman && zaman < _redlineLimit){ // eniyizaman<zaman<redlineLimit
                 _zamanListesi.text += $"<color=#ff0000>({çözümIndex}) {ZamanıSaateÇevir(zaman)}</color>";
             }
             else{

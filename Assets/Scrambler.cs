@@ -27,6 +27,8 @@ public class Scrambler : MonoBehaviour
     string[] front_back;
     string[] up_down;
 
+    [SerializeField] Visualizer visualizer;
+
     void Start()
     {
         moves = new string[6] { MOVE_U, MOVE_D, MOVE_L, MOVE_R, MOVE_F, MOVE_B };
@@ -66,6 +68,7 @@ public class Scrambler : MonoBehaviour
         }
         scramble = string.Join(" ", scramble_list.ToArray());
         _scrambleText.text = scramble;
+        visualizer.InterpretAlgorithm(scramble);
     }
 }
 
