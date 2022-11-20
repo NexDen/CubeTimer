@@ -19,78 +19,56 @@ public class Scrambler : MonoBehaviour
 
     public List<string> scramble_list;
     #region Arrayler
-    string[] moves3;
-    string[] appends3;
-    string[] lateral3;
-    string[] front_back3;
-    string[] up_down3;
-
-    string[] moves4;
-    string[] appends4;
-    string[] lateral4;
-    string[] front_back4;
-    string[] up_down4;
-    string[] lateral_wide4;
-    string[] front_back_wide4;
-    string[] up_down_wide4;
+    string[] moves;
+    string[] appends;
+    string[] lateral;
+    string[] front_back;
+    string[] up_down;
     #endregion
     [SerializeField] Visualizer visualizer;
 
     void Start()
     {
         if (SceneManager.GetActiveScene().name == "EskiKarıştırmalar") return;
-        moves3 = new string[6] { "U", "D", "L", "R", "F", "B" };
-        appends3 = new string[3] { "'", "2", "" };
-        lateral3 = new string[2] { "L", "R" };
-        front_back3 = new string[2] { "F", "B" };
-        up_down3 = new string[2] { "U", "D" };
-
-        moves4 = new string[] { "U", "D", "L", "R", "F", "B", "Uw", "Dw", "Lw", "Rw", "Fw", "Bw"};
-        appends4 = new string[] { "'", "2", "" };
-        lateral4 = new string[] { "L", "R" };
-        lateral_wide4 = new string[] { "Lw", "Rw" };
-        front_back4 = new string[] { "F", "B" };
-        front_back_wide4 = new string[] { "Fw", "Bw" };
-        up_down4 = new string[] { "U", "D" };
-        up_down_wide4 = new string[] { "Uw", "Dw" };
-
+        moves = new string[6] { "U", "D", "L", "R", "F", "B" };
+        appends = new string[3] { "'", "2", "" };
+        lateral = new string[2] { "L", "R" };
+        front_back = new string[2] { "F", "B" };
+        up_down = new string[2] { "U", "D" };
 
         scramble = "";
         scramble_list = new List<string>();
         _scrambleText.text = "";
-        GenerateNewScramble(cube_size);
+        GenerateNewScramble();
     }
 
     Move GenerateSingleMove(int size)
     {
-        string move = moves3[RNG.Next(0, moves3.Length)];
-        string append = appends3[RNG.Next(0, appends3.Length)];
+        string move = moves[RNG.Next(0, moves.Length)];
+        string append = appends[RNG.Next(0, appends.Length)];
         return new Move(move, append); 
     }
 
     public void YeniKarıştırma(){
         _prevScrambles.RemoveAt(_prevScrambles.Count - 1);
-        GenerateNewScramble(cube_size);
+        GenerateNewScramble();
     }
 
-    public void GenerateNewScramble(int size) 
+    public void GenerateNewScramble() 
     {
         Move last_move;
         int scramble_length;
         
         scramble_list.Clear();
         last_move = new Move("B", ""); //default move
-        scramble_length = RNG.Next(18, 19);
+        scramble_length = RNG.Next(18, 25);
         for (int i = 0; i < scramble_length; i++)
         {
             Move move = GenerateSingleMove(cube_size);
             if (last_move.move == move.move) { i--; continue; }
-            if (lateral3.Contains(move.move) && lateral3.Contains(last_move.move)) { i--; continue; }
-            if (front_back3.Contains(move.move) && front_back3.Contains(last_move.move)) { i--; continue; }
-            if (up_down3.Contains(move.move) && up_down3.Contains(last_move.move)) { i--; continue; }
-            if (lateral_wide4.Contains(move.move) && lateral_wide4.Contains(last_move.move)) { i--; continue; }
-            if (front_back_wide4.Contains(move.move) && front_back_wide4.Contains(last_move.move)) { i--; continue; }
-            if (up_down_wide4.Contains(move.move) && up_down_wide4.Contains(last_move.move)) { i--; continue; }
+            if (lateral.Contains(move.move) && lateral.Contains(last_move.move)) { i--; continue; }
+            if (front_back.Contains(move.move) && front_back.Contains(last_move.move)) { i--; continue; }
+            if (up_down.Contains(move.move) && up_down.Contains(last_move.move)) { i--; continue; }
 
             last_move = move;
             scramble_list.Add(move.ToString());
@@ -99,10 +77,8 @@ public class Scrambler : MonoBehaviour
         scramble = string.Join(" ", scramble_list.ToArray());
         _scrambleText.text = scramble;
         _prevScrambles.Add(scramble);
-        if (cube_size == 3) visualizer.InterpretAlgorithm(scramble);
-        else visualizer.setAllZero();
-        }
-
+        visualizer.InterpretAlgorithm(scramble);
+    }
     List<string> SonElemanlarıAl(List<string> liste,int index){
         List<string> yeniListe = new List<string>();
         for (int i = Math.Max(0,liste.Count() - index); i < liste.Count(); i++){

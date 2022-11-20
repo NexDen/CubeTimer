@@ -4,6 +4,7 @@ using System.Collections.Generic; // List
 using System.Linq; // Random
 using UnityEngine; // using Random = System.Random;
 using UnityEngine.UI; // Text
+using System.IO;
 /*
 V0.31.10
 DEĞİŞENLER:
@@ -14,7 +15,7 @@ DEĞİŞENLER:
 public class Timer : MonoBehaviour
 {
     #region Zamanlayıcı Değişkenleri
-    /* 
+    /*
     bunlar [SerializeField] çünkü GetComponent<>() yapmak yerine
     direkt Unity içinden değişiliyor.
     */
@@ -29,7 +30,6 @@ public class Timer : MonoBehaviour
     [SerializeField] public bool zamanlayıcıGörünüm;
     [SerializeField] public int çözümSayısı;
     [SerializeField] public float redlineLimit;
-    [SerializeField] public int cube_size;
     #endregion
     
     #region UI Elemanları
@@ -67,9 +67,6 @@ public class Timer : MonoBehaviour
 
 
     #endregion
-    
-
-    [Range(0,40)] public float textsize2; // debug için :)
 
     #region Güncellemeler
     void zamanListesiGüncelle(){ 
@@ -78,18 +75,18 @@ public class Timer : MonoBehaviour
         nin üzerindeki zamanları dinamik olarak günceller  
         */
         zamanListesi.text = "";
-        int çözümIndex = Math.Max(çözümSayısı-17, 1);
+        int çözümIndex = Math.Max(zamanlar.Count()-17, 1);
         foreach(float zaman in SonZamanlarıAl(zamanlar, 18)){ // ekrana maksimum 18 tane sığıyor zaten
             if (zaman == zamanlar.Min()){ // zaman = eniyizaman
                 if (çözümIndex == 1){
-                    if (zaman < redlineLimit) zamanListesi.text += $"<color=#00ff00>({çözümIndex}) {ZamanıSaateÇevir(zaman)}</color> <size={textsize2}>({scrambler._prevScrambles[çözümIndex-1]})</size>";
+                    if (zaman < redlineLimit) zamanListesi.text += $"<color=#00ff00>({çözümIndex}) {ZamanıSaateÇevir(zaman)}</color>";
                     else if (çözümSayısı != 1) zamanListesi.text += $"<color=#00ff00>({çözümIndex}) {ZamanıSaateÇevir(zaman)}</color>";
                     else zamanListesi.text += $"({çözümIndex}) {ZamanıSaateÇevir(zaman)}";
                 }
-                else zamanListesi.text += $"<color=#00ff00>({çözümIndex}) {ZamanıSaateÇevir(zaman)}</color> <size={textsize2}>({scrambler._prevScrambles[çözümIndex-1]})</size>";
+                else zamanListesi.text += $"<color=#00ff00>({çözümIndex}) {ZamanıSaateÇevir(zaman)}</color>";
             }
             else if (eniyiZaman < zaman && zaman < redlineLimit){ // eniyizaman<zaman<redlineLimit
-                zamanListesi.text += $"<color=#ff0000>({çözümIndex}) {ZamanıSaateÇevir(zaman)}</color> <size={textsize2}>({scrambler._prevScrambles[çözümIndex-1]})</size>";
+                zamanListesi.text += $"<color=#ff0000>({çözümIndex}) {ZamanıSaateÇevir(zaman)}</color>";
             }
             else{
                 zamanListesi.text += $"({çözümIndex}) {ZamanıSaateÇevir(zaman)}";
@@ -136,6 +133,24 @@ public class Timer : MonoBehaviour
         ORT10 = 0;
         dnfKilit = true;
         artı2Kilit = true;
+
+        /*
+        Zaman listesinin dosyadan alınması
+        */
+        string path = Application.persistentDataPath + "/Zamanlar.txt";
+        StreamReader reader = new StreamReader(path);
+        string contents = reader.ReadToEnd();
+        string[] dosya_zamanlar = contents.Split("\n").Skip(1).ToArray();
+        reader.Close();
+        foreach (string zaman in dosya_zamanlar)
+        {   
+            float eklenecekZaman = float.Parse(zaman);
+            zamanlar.Add(eklenecekZaman);
+        }
+        çözümSayısı = zamanlar.Count();
+        OrtalamalarıHesapla();
+        EniyiZamanGüncelle();
+
     }
 
     void Update()
@@ -216,10 +231,15 @@ public class Timer : MonoBehaviour
         
         _eniyiZaman.text = ZamanıSaateÇevir(eniyiZaman);
         zamanlayıcı.text = ZamanıSaateÇevir(zaman);
-        scrambler.GenerateNewScramble(cube_size);
+        scrambler.GenerateNewScramble();
         
         zamanListesiGüncelle();
         OrtalamalarıHesapla();
+        
+        string path = Application.persistentDataPath + "/Zamanlar.txt";
+        StreamWriter writer = new StreamWriter(path, true);
+        writer.Write("\n" + zaman.ToString());
+        writer.Close();
         
 
         
@@ -256,6 +276,27 @@ public class Timer : MonoBehaviour
         OrtalamalarıHesapla();
         artı2uyarı.gameObject.SetActive(false);
         dnfKilit = true; // (gerek yok ama ne olur ne olmaz elde bulunsun)
+
+
+        string path = Application.persistentDataPath + "/Zamanlar.txt";
+        StreamReader reader = new StreamReader(path);
+        string contents = reader.ReadToEnd();
+        string[] temp_zamanlar = contents.Split("\n");
+        reader.Close();
+        foreach (string zaman in temp_zamanlar){
+            Debug.Log(zaman);
+        }
+
+        StreamWriter writer = new StreamWriter(path, false);
+        writer.Write("");
+        writer.Close();
+        writer = new StreamWriter(path, true);
+        for (int i=0; i <= zamanlar.Count -1; i++){
+            writer.Write("\n" + temp_zamanlar[i]);
+        }
+        writer.Close();
+
+    
     }
     public void artı2(){
         if (artı2Kilit) return;
@@ -269,28 +310,32 @@ public class Timer : MonoBehaviour
 
         artı2uyarı.gameObject.SetActive(true);
 
+
+        string path = Application.persistentDataPath + "/Zamanlar.txt";
+        StreamReader reader = new StreamReader(path);
+        string contents = reader.ReadToEnd();
+        string[] temp_zamanlar = contents.Split("\n");
+        reader.Close();
+
+        StreamWriter writer = new StreamWriter(path, false);
+        writer.Write("");
+        writer.Close();
+        writer = new StreamWriter(path, true);
+        for (int i=0; i <= temp_zamanlar.Count() -2; i++){
+            if (i == 0){
+                writer.Write(temp_zamanlar[i]);
+            }
+            else {
+                writer.Write("\n"+temp_zamanlar[i]);
+            }
+        }
+        writer.Write("\n" + zamanlar[zamanlar.Count() -1]);
+        writer.Close();
+
         zamanListesiGüncelle();
         EniyiZamanGüncelle();
         OrtalamalarıHesapla();
-    }
-    public void Reset(){
-        zaman = 0;
-        zamanlar.Clear();
-        zamanlayıcı.text = "0.00";
-        ort5Text.text = "-";
-        ORT10Text.text = "-";
-        _eniyiZaman.text = "-";
-        çözümSayısı = 0;
-        eniyiZaman = 0;
-        ORT = 0;
-        ORT5 = 0;
-        ORT10 = 0;
-        zamanListesiGüncelle();
-        OrtalamalarıHesapla();
         artı2Kilit = true;
-        dnfKilit = true;
-        artı2uyarı.gameObject.SetActive(false);
-        scrambler.GenerateNewScramble(cube_size);
     }
 
     void OrtalamalarıHesapla(){
@@ -299,7 +344,7 @@ public class Timer : MonoBehaviour
             ORT5 = Ortalama(SonZamanlarıAl(zamanlar, 5)); // ortalama hesapla
             ort5Text.text = ZamanıSaateÇevir(ORT5); // ortalamayı ekrana yazdır
         }
-        if (zamanlar.Count >= 11) // eğer liste 10 ise
+        if (zamanlar.Count >= 10) // eğer liste 10 ise
         {
             ORT10 = Ortalama(SonZamanlarıAl(zamanlar, 10)); // ortalama hesapla
             ORT10Text.text = ZamanıSaateÇevir(ORT10); // ortalamayı ekrana yazdır

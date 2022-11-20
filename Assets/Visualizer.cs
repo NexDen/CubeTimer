@@ -14,6 +14,15 @@ public class Visualizer : MonoBehaviour
     [SerializeField] public List<GameObject> back;
     public Dictionary<int,Color> colors = new Dictionary<int, Color>()
     {
+        /*
+        0 = Siyah (Boş)
+        1 = Beyaz (U)
+        2 = Yeşil (F)
+        3 = Turuncu (L)
+        4 = Mavi (B)
+        5 = Kırmızı (R)
+        6 = Sarı (D)
+        */
         {0, Color.black},
         {1, Color.white},
         {2, Color.green},

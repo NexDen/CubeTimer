@@ -17,7 +17,11 @@ MonoBehaviour:
   description: 
   preview: {fileID: 0}
   dependencies:
+  - dependency: {fileID: 4900000, guid: acc027f4df49a854fb27f70247e804ba, type: 3}
+    instantiationMode: 1
   - dependency: {fileID: 2800000, guid: 48e93eef0688c4a259cb0eddcd8661f7, type: 3}
+    instantiationMode: 0
+  - dependency: {fileID: 2800000, guid: 209b3d6182882ad4aa55f335216dbefd, type: 3}
     instantiationMode: 0
   - dependency: {fileID: 2800000, guid: 4e2624e262d93b24396f4c950c7638d5, type: 3}
     instantiationMode: 0
