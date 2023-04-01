@@ -9,10 +9,8 @@ using UnityEngine.SceneManagement;
 
 public class Scrambler : MonoBehaviour
 {
-    string scramble;
+    public string scramble;
     [SerializeField] Text _scrambleText;
-    [SerializeField] public List<string> _prevScrambles = new List<string>();
-    [SerializeField] Text _prevScramblesText;
     Random RNG = new Random();
     
     public int cube_size = 3;
@@ -49,11 +47,6 @@ public class Scrambler : MonoBehaviour
         return new Move(move, append); 
     }
 
-    public void YeniKarıştırma(){
-        _prevScrambles.RemoveAt(_prevScrambles.Count - 1);
-        GenerateNewScramble();
-    }
-
     public void GenerateNewScramble() 
     {
         Move last_move;
@@ -76,19 +69,7 @@ public class Scrambler : MonoBehaviour
         }
         scramble = string.Join(" ", scramble_list.ToArray());
         _scrambleText.text = scramble;
-        _prevScrambles.Add(scramble);
         visualizer.InterpretAlgorithm(scramble);
-    }
-    List<string> SonElemanlarıAl(List<string> liste,int index){
-        List<string> yeniListe = new List<string>();
-        for (int i = Math.Max(0,liste.Count() - index); i < liste.Count(); i++){
-            yeniListe.Add(liste[i]);
-        }
-        return yeniListe;
-    }
-
-    public void ReturnPrevScrambles(){
-        _prevScramblesText.text = string.Join("\n", SonElemanlarıAl(_prevScrambles, 16).ToArray());
     }
 }
 

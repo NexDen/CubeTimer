@@ -1052,58 +1052,29 @@ MonoBehaviour:
   m_GameObject: {fileID: 134299912}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 228983cd93ee9b24b8532001780a52c0, type: 3}
+  m_Script: {fileID: 11500000, guid: d5d5bbf6db528b1469df4a86cad2f081, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  "ba\u015Flatma\u0130\xE7inBas\u0131l\u0131Tutma": 0
-  "bas\u0131l\u0131TutmaS\xFCresi": 0
-  zaman: 0
-  "ba\u015Flad\u0131": 0
-  "ba\u015Flayabilir": 0
-  "art\u01312Kilit": 0
-  dnfKilit: 0
-  zamanlar: []
-  "zamanlay\u0131c\u0131G\xF6r\xFCn\xFCm": 0
-  "\xE7\xF6z\xFCmSay\u0131s\u0131": 0
-  redlineLimit: 20
-  "zamanlay\u0131c\u0131": {fileID: 1227939807}
-  _eniyiZaman: {fileID: 694746795}
-  zamanListesi: {fileID: 946230830}
-  ort5Text: {fileID: 202972613}
-  ORT10Text: {fileID: 2037398214}
-  ortText: {fileID: 1313825761}
-  ort5Label: {fileID: 25208275}
-  ort10Label: {fileID: 249655090}
-  ortLabel: {fileID: 1873655793}
-  "en\u0130yiZamanLabel": {fileID: 2016595266}
-  "kar\u0131\u015Ft\u0131rmaLabel": {fileID: 1111883966}
-  "art\u01312uyar\u0131": {fileID: 576404350}
-  scrambler: {fileID: 657986624}
-  "kapat\u0131lacaklar":
-  - {fileID: 5053884}
-  - {fileID: 1476583347}
-  - {fileID: 470962721}
-  - {fileID: 429820688}
-  - {fileID: 1612657174}
-  - {fileID: 765988978}
-  - {fileID: 1523906082}
-  - {fileID: 946230828}
-  - {fileID: 1701653344}
-  - {fileID: 559322189}
-  - {fileID: 1804865907}
-  - {fileID: 278021104}
-  - {fileID: 271251722}
-  - {fileID: 967084213}
-  - {fileID: 864201021}
-  - {fileID: 1530177529}
-  - {fileID: 1111883964}
-  "zamanlay\u0131c\u0131Toggle": {fileID: 1523906084}
-  toggleLabel1: {fileID: 681552924}
-  "g\xFCncelZaman": {fileID: 464627657}
-  ORT5: 0
-  ORT10: 0
-  ORT: 0
-  eniyiZaman: 0
+  timeHeld: 0
+  timeCounter: 0
+  holdForStart: 0
+  ableToStart: 0
+  solveActive: 0
+  showTimerToggle: {fileID: 1523906084}
+  timerText: {fileID: 1227939807}
+  timeList: {fileID: 946230830}
+  plus2Indicator: {fileID: 576404350}
+  solves: []
+  scrambleHandler: {fileID: 657986624}
+  UIhandler: {fileID: 202410747}
+  PB: 0
+  AVG5: 0
+  AVG10: 0
+  AVG: 0
+  PBText: {fileID: 694746795}
+  AVG5Text: {fileID: 202972613}
+  AVG10Text: {fileID: 2037398214}
+  AVGText: {fileID: 1313825761}
 --- !u!1 &138634799
 GameObject:
   m_ObjectHideFlags: 0
@@ -1385,6 +1356,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 235d8a271dd5fea4c8df7406400fd54e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  toBeRemoved:
+  - {fileID: 5053884}
+  - {fileID: 1476583347}
+  - {fileID: 470962721}
+  - {fileID: 429820688}
+  - {fileID: 1612657174}
+  - {fileID: 765988978}
+  - {fileID: 1523906082}
+  - {fileID: 946230828}
+  - {fileID: 1701653344}
+  - {fileID: 1530177529}
+  - {fileID: 1111883964}
+  clock: {fileID: 464627657}
 --- !u!4 &202410748
 Transform:
   m_ObjectHideFlags: 0
@@ -2184,7 +2168,7 @@ GameObject:
   - component: {fileID: 464627658}
   - component: {fileID: 464627657}
   m_Layer: 5
-  m_Name: "G\xFCncel Saat"
+  m_Name: Clock
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2207,7 +2191,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.0000076294, y: 487}
+  m_AnchoredPosition: {x: -0, y: 487}
   m_SizeDelta: {x: 175.4382, y: 55.7303}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &464627657
@@ -3108,9 +3092,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 447effbd73811b14f835489f4a9e5512, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  scramble: 
   _scrambleText: {fileID: 1111883966}
-  _prevScrambles: []
-  _prevScramblesText: {fileID: 0}
   cube_size: 3
   scramble_list: []
   visualizer: {fileID: 48857800}
@@ -3871,8 +3854,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 134299914}
-        m_TargetAssemblyTypeName: Timer, Assembly-CSharp
-        m_MethodName: "art\u01312"
+        m_TargetAssemblyTypeName: Timer_Rewrite, Assembly-CSharp
+        m_MethodName: Plus2
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4373,7 +4356,7 @@ GameObject:
   - component: {fileID: 946230831}
   - component: {fileID: 946230830}
   m_Layer: 5
-  m_Name: ZamanListesi
+  m_Name: Time List
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4396,7 +4379,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -735.9, y: 14.02}
+  m_AnchoredPosition: {x: -704, y: 14.02}
   m_SizeDelta: {x: 768.3826, y: 952.8822}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &946230830
@@ -5842,7 +5825,7 @@ GameObject:
   - component: {fileID: 1523906083}
   - component: {fileID: 1523906084}
   m_Layer: 5
-  m_Name: "Zamanlay\u0131c\u0131G\xF6ster"
+  m_Name: Show Timer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6322,7 +6305,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1789505198}
-  - {fileID: 1783454853}
   m_Father: {fileID: 1431877898}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -6376,7 +6358,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 134299914}
-        m_TargetAssemblyTypeName: Timer, Assembly-CSharp
+        m_TargetAssemblyTypeName: Timer_Rewrite, Assembly-CSharp
         m_MethodName: DNF
         m_Mode: 1
         m_Arguments:
@@ -6575,7 +6557,7 @@ GameObject:
   - component: {fileID: 1701653347}
   - component: {fileID: 1701653346}
   m_Layer: 5
-  m_Name: "Yeni Kar\u0131\u015Ft\u0131rma"
+  m_Name: New Scramble
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6648,7 +6630,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 657986624}
         m_TargetAssemblyTypeName: Scrambler, Assembly-CSharp
-        m_MethodName: "YeniKar\u0131\u015Ft\u0131rma"
+        m_MethodName: GenerateNewScramble
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -6864,43 +6846,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!1 &1783454852
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1783454853}
-  m_Layer: 5
-  m_Name: Easter Egg
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &1783454853
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1783454852}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1998368753}
-  m_Father: {fileID: 1612657175}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -544.9999, y: -132.99998}
-  m_SizeDelta: {x: 170, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1784858031
 GameObject:
   m_ObjectHideFlags: 0
@@ -7854,86 +7799,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!1 &1998368752
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1998368753}
-  - component: {fileID: 1998368755}
-  - component: {fileID: 1998368754}
-  m_Layer: 5
-  m_Name: Click Counter
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!224 &1998368753
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1998368752}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1783454853}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 413.80017, y: 131.6}
-  m_SizeDelta: {x: 160.3378, y: 68.598}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1998368754
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1998368752}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_FontData:
-    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 50
-    m_FontStyle: 0
-    m_BestFit: 0
-    m_MinSize: 0
-    m_MaxSize: 70
-    m_Alignment: 4
-    m_AlignByGeometry: 0
-    m_RichText: 1
-    m_HorizontalOverflow: 0
-    m_VerticalOverflow: 0
-    m_LineSpacing: 1
-  m_Text: 0/40
---- !u!222 &1998368755
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1998368752}
-  m_CullTransparentMesh: 1
 --- !u!1 &2009386337
 GameObject:
   m_ObjectHideFlags: 0
