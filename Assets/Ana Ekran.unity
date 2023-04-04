@@ -1052,7 +1052,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 134299912}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5d5bbf6db528b1469df4a86cad2f081, type: 3}
+  m_Script: {fileID: 11500000, guid: 228983cd93ee9b24b8532001780a52c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   timeHeld: 0
@@ -1060,6 +1060,7 @@ MonoBehaviour:
   holdForStart: 0
   ableToStart: 0
   solveActive: 0
+  plus2pressed: 0
   showTimerToggle: {fileID: 1523906084}
   timerText: {fileID: 1227939807}
   timeList: {fileID: 946230830}
@@ -1368,6 +1369,7 @@ MonoBehaviour:
   - {fileID: 1701653344}
   - {fileID: 1530177529}
   - {fileID: 1111883964}
+  PbText: {fileID: 2016595266}
   clock: {fileID: 464627657}
 --- !u!4 &202410748
 Transform:
@@ -3854,7 +3856,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 134299914}
-        m_TargetAssemblyTypeName: Timer_Rewrite, Assembly-CSharp
+        m_TargetAssemblyTypeName: Timer, Assembly-CSharp
         m_MethodName: Plus2
         m_Mode: 1
         m_Arguments:
@@ -6358,20 +6360,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 134299914}
-        m_TargetAssemblyTypeName: Timer_Rewrite, Assembly-CSharp
+        m_TargetAssemblyTypeName: Timer, Assembly-CSharp
         m_MethodName: DNF
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 202410747}
-        m_TargetAssemblyTypeName: UIHandler, Assembly-CSharp
-        m_MethodName: DnfClicked
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -7894,6 +7884,7 @@ GameObject:
   - component: {fileID: 2016595265}
   - component: {fileID: 2016595267}
   - component: {fileID: 2016595266}
+  - component: {fileID: 2016595268}
   m_Layer: 5
   m_Name: pb_label
   m_TagString: Untagged
@@ -7963,6 +7954,27 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2016595264}
   m_CullTransparentMesh: 1
+--- !u!95 &2016595268
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2016595264}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: ba2ff2489e00c804daa8b2f274ef38ab, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &2017522427
 GameObject:
   m_ObjectHideFlags: 0

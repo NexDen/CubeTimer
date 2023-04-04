@@ -15,7 +15,7 @@ public class Visualizer : MonoBehaviour
     public Dictionary<int,Color> colors = new Dictionary<int, Color>()
     {
         /*
-        0 = Siyah (Boş)
+        0 = Siyah (Boş) <- bunu görürsen bişeyler yanlış gitti
         1 = Beyaz (U)
         2 = Yeşil (F)
         3 = Turuncu (L)

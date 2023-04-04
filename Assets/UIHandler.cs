@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,7 @@ using UnityEngine.SceneManagement;
 public class UIHandler : MonoBehaviour
 {
     [SerializeField] List<GameObject> toBeRemoved;
+    [SerializeField] public Text PbText;
     public Text clock;
 
     public void HideScreen(){

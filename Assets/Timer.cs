@@ -1,420 +1,247 @@
-using System; // Math
+using System;
+using System.Linq;
 using System.Collections;
-using System.Collections.Generic; // List
-using System.Linq; // Random
-using UnityEngine; // using Random = System.Random;
-using UnityEngine.UI; // Text
-using System.IO;
-/*
-V0.31.10
-DEĞİŞENLER:
-- En iyi zaman yeşil, 20 saniyenin altındaki zamanlar kırmızı olarak gösteriliyor
-- Ekranın en üstünde saati gösteren yazı eklendi
-- Optimizasyonlar (zamanAmaString patladı)
-*/
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+
 public class Timer : MonoBehaviour
 {
-    #region Zamanlayıcı Değişkenleri
-    /*
-    bunlar [SerializeField] çünkü GetComponent<>() yapmak yerine
-    direkt Unity içinden değişiliyor.
-    */
-    [SerializeField] public bool başlatmaİçinBasılıTutma; // basılı tutulma durumu (ilk)
-    [SerializeField] public float basılıTutmaSüresi; // basılı tutulma durumu (süre)
-    [SerializeField] public float zaman; // milisaniye cinsinden zaman
-    [SerializeField] public bool başladı; // başlatılma durumu
-    [SerializeField] public bool başlayabilir; // başlatılabilirlik durumu
-    [SerializeField] public bool artı2Kilit;
-    [SerializeField] public bool dnfKilit;
-    [SerializeField] public List<float> zamanlar; // zamanları tutan liste
-    [SerializeField] public bool zamanlayıcıGörünüm;
-    [SerializeField] public int çözümSayısı;
-    [SerializeField] public float redlineLimit;
-    #endregion
-    
-    #region UI Elemanları
-    /*
-    bunların HEPSİ [SerializeField] çünkü
-    TEKER TEKER GetComponent<>() çekmek zor olur.
-    */
-    [SerializeField] public Text zamanlayıcı;
-    [SerializeField] public Text _eniyiZaman;
-    [SerializeField] public Text zamanListesi;
-    [SerializeField] public Text ort5Text;
-    [SerializeField] public Text ORT10Text;
-    [SerializeField] public Text ortText;
+    public float timeHeld;
+    public float timeCounter;
 
-    [SerializeField] public Text ort5Label;
-    [SerializeField] public Text ort10Label;
-    [SerializeField] public Text ortLabel;
-    [SerializeField] public Text enİyiZamanLabel;
-    [SerializeField] public Text karıştırmaLabel;
+    public bool holdForStart;
+    public bool ableToStart;
+    public bool solveActive;
+    public bool plus2pressed;
 
-    [SerializeField] public Text artı2uyarı;
-    [SerializeField] public Scrambler scrambler;
-    [SerializeField] List<GameObject> kapatılacaklar;
+    public Toggle showTimerToggle;
+    public Text timerText;
+    public Text timeList;
+    public Text plus2Indicator;
 
-    [SerializeField] public Toggle zamanlayıcıToggle;
-    [SerializeField] public Text toggleLabel1;
-    [SerializeField] public Text güncelZaman;
-    #endregion
+    [SerializeField] public List<Solve> solves;
 
-    #region Ortalamalar
-    public float ORT5;
-    public float ORT10;
-    public float ORT;
-    public float eniyiZaman;
+    public Scrambler scrambleHandler;
+    public UIHandler UIhandler;
 
+    public float PB;
+    public float AVG5;
+    public float AVG10;
+    public float AVG;
 
-    #endregion
+    public Text PBText;
+    public Text AVG5Text;
+    public Text AVG10Text;
+    public Text AVGText;
 
-    #region Güncellemeler
-    void zamanListesiGüncelle(){ 
-        /* 
-        zamanListesi (ekranın en solundaki zaman listesi)
-        nin üzerindeki zamanları dinamik olarak günceller  
-        */
-        zamanListesi.text = "";
-        int çözümIndex = Math.Max(zamanlar.Count()-17, 1);
-        foreach(float zaman in SonZamanlarıAl(zamanlar, 18)){ // ekrana maksimum 18 tane sığıyor zaten
-            if (zaman == zamanlar.Min()){ // zaman = eniyizaman
-                if (çözümIndex == 1){
-                    if (zaman < redlineLimit) zamanListesi.text += $"<color=#00ff00>({çözümIndex}) {ZamanıSaateÇevir(zaman)}</color>";
-                    else if (çözümSayısı != 1) zamanListesi.text += $"<color=#00ff00>({çözümIndex}) {ZamanıSaateÇevir(zaman)}</color>";
-                    else zamanListesi.text += $"({çözümIndex}) {ZamanıSaateÇevir(zaman)}";
-                }
-                else zamanListesi.text += $"<color=#00ff00>({çözümIndex}) {ZamanıSaateÇevir(zaman)}</color>";
-            }
-            else if (eniyiZaman < zaman && zaman < redlineLimit){ // eniyizaman<zaman<redlineLimit
-                zamanListesi.text += $"<color=#ff0000>({çözümIndex}) {ZamanıSaateÇevir(zaman)}</color>";
-            }
-            else{
-                zamanListesi.text += $"({çözümIndex}) {ZamanıSaateÇevir(zaman)}";
-            }
-            zamanListesi.text += "\n";
-            çözümIndex++;
-        }
-    }
-
-    void EniyiZamanGüncelle(){
-        /*
-        en iyi zamanın ne olduğunu bulmak 
-        ve onu ekranın sol altındaki yere 
-        yazmak için basit fonksiyon
-        */
-
-        float öncekiEnİyiZaman = eniyiZaman;
-
-        if (zamanlar.Count() == 0){
-            _eniyiZaman.text = "-";
-        }
-        else{
-            eniyiZaman = zamanlar.Min();
-            _eniyiZaman.text = ZamanıSaateÇevir(eniyiZaman);
-            
-        }
-        
-    }
-
-    #endregion
-
-    #region Unity Fonksiyonları
+    // Start is called before the first frame update
     void Start()
     {
-        /*
-        genel başlangıç ve değişkenlerin ayarlanması
-        */
-        zamanListesiGüncelle();
-        başlatmaİçinBasılıTutma = false;
-        basılıTutmaSüresi = 0;
-        başladı = false;
-        zaman = 0;
-        ORT5 = 0;
-        ORT10 = 0;
-        dnfKilit = true;
-        artı2Kilit = true;
-
-        /*
-        Zaman listesinin dosyadan alınması
-        */
-        string path = Application.persistentDataPath + "/Zamanlar.txt";
-        StreamReader reader = new StreamReader(path);
-        string contents = reader.ReadToEnd();
-        string[] dosya_zamanlar = contents.Split("\n").Skip(1).ToArray();
-        reader.Close();
-        foreach (string zaman in dosya_zamanlar)
-        {   
-            float eklenecekZaman = float.Parse(zaman);
-            zamanlar.Add(eklenecekZaman);
-        }
-        çözümSayısı = zamanlar.Count();
-        OrtalamalarıHesapla();
-        EniyiZamanGüncelle();
-
+        holdForStart = false;
+        timeHeld = 0;
+        solves = new List<Solve>();
     }
 
+    // Update is called once per frame
     void Update()
     {
-        zamanlayıcıGörünüm = zamanlayıcıToggle.isOn; // eğer zamanlayıcı gösterilmek isteniyorsa
-        if (başlatmaİçinBasılıTutma) // eğer basılı tutuluyosa
-        {
-            basılıTutmaSüresi += Time.deltaTime; // basılı tutma süresi say
-            if (basılıTutmaSüresi >= 0.55f) // eğer 0.55(resmi WCA sayaç bekleme süresi) saniye basılı tutulduysa
-            {
-                zamanlayıcı.color = Color.green;
-                başlayabilir = true; // bırakılıncaya kadar hazır dur
+        if (holdForStart){
+            timerText.color = Color.red;
+            timeHeld += Time.deltaTime;
+            if (timeHeld >= 0.55f){
+                timerText.color = Color.green;
+                ableToStart = true;
             }
         }
-        if (başladı) // başlandıysa zaman say
-        {
-            zaman += Time.deltaTime; // zaman say
-           
-            if (zamanlayıcıGörünüm) zamanlayıcı.text = ZamanıSaateÇevir(zaman); // eğer zamanlayıcı gösterilmek isteniyorsa göster
-            else zamanlayıcı.text = "-"; // yoksa "-" ı bas geç
+        if (solveActive){
+            timeCounter += Time.deltaTime;
+            if (showTimerToggle.isOn){
+                timerText.text = ConvertTimeToString(timeCounter);
+            }
+            else {
+                timerText.text = "-";
+            }
+        }
+        if (Input.GetMouseButtonDown(0)){
+            Press();
+        }
+        if (Input.GetMouseButtonUp(0)){
+            Release();
+        }
+    }
+
+    void Press(){
+        holdForStart = true;
+        plus2Indicator.gameObject.SetActive(false);
+        if (solveActive){
+            StopTimer();
+        }
+    }
+
+    void Release(){
+        holdForStart = false;
+        timeHeld = 0;
+        timerText.color = Color.white;
+        if (ableToStart){
+            StartTimer();
+        }
+    }
+
+    void StartTimer(){
+        solveActive = true;
+        ableToStart = false;
+        plus2pressed = false;
+        timeCounter = 0;
+        UIhandler.HideScreen();
+    }
+    
+    void StopTimer(){
+        solveActive = false;
+
+        timerText.text = ConvertTimeToString(timeCounter);
+
+        if (timeCounter < PB){
+            // PB Animation goes here
         }
 
-        if (Input.GetMouseButtonDown(0)) // eğer ekrana basıldıysa
-        {
-            Bas();
+        string scramble = scrambleHandler.scramble;
+        solves.Add(new Solve(timeCounter, scramble));
+        scrambleHandler.GenerateNewScramble();
+
+        HandleTimeList();
+
+        UIhandler.ShowScreen();
+    }
+
+    void HandleTimeList(){
+        timeList.text = "";
+        if (solves.Count() == 0){
+            PBText.text = "-";
+            AVGText.text = "-";
+            return;
         }
-        if (Input.GetMouseButtonUp(0)) // eğer ekrana basılma kesildiyse
-        {
-            Çek();
+        Solve best_solve = new Solve(2147483647, "");
+        foreach(Solve solve in solves){
+            if (solve.solveTime < best_solve.solveTime){
+                best_solve.isBestSolve = false;
+                best_solve = solve;
+            }
         }
+
+        best_solve.isBestSolve = true;
+        PB = best_solve.solveTime;
+        PBText.text = ConvertTimeToString(PB);
+
+        int solve_count = Math.Max(0, solves.Count() - 18) + 1;
+        foreach(Solve solve in solves.Skip(solve_count - 1)){
+            if (solve.isBestSolve){
+                timeList.text += $"<color=#00ff00>({solve_count}) {ConvertTimeToString(solve.solveTime)}</color>\n";
+            }
+            else if (solve.isBelowThreshold){
+                timeList.text += $"<color=#ff0000>({solve_count}) {ConvertTimeToString(solve.solveTime)}</color>\n";
+            }
+            else {
+                timeList.text += $"({solve_count}) {ConvertTimeToString(solve.solveTime)}\n";
+            }
+            solve_count++;
+        }
+        CalculateAverages();
+    }
+
+    public void DNF(){
+        Solve last_solve = solves.LastOrDefault();
+        solves.Remove(last_solve);
+        timerText.text = "DNF";
+        HandleTimeList();
+    }
+
+    public void Plus2(){
+        if (plus2pressed){return;}
+        plus2pressed = true;
+        Solve last_solve = solves.LastOrDefault();
+        solves.Remove(last_solve);
         
-        zamanListesiGüncelle();
-        güncelZaman.text = System.DateTime.Now.ToString("HH:mm"); // ekranın en üstündeki saati ayarla
-    }
-    
-    #endregion
-    
-    #region Ekrana Ekleme-Kaldırma 
-    /* 
-    zamanlayıcı başlayınca ekrandan 
-    kalkacak şeyleri kaldır/geri ekle 
-    */
-    void EkranaEkle(){ 
-        foreach (GameObject g in kapatılacaklar)
-        {
-            g.gameObject.SetActive(true);
-        }
+        Solve new_solve = new Solve(last_solve.solveTime + 2, last_solve.scramble);
+        solves.Add(new_solve);
+
+        timerText.text = ConvertTimeToString(new_solve.solveTime);
+        
+        HandleTimeList();
+
+        plus2Indicator.gameObject.SetActive(true);
     }
 
-    void EkrandanKaldır(){
-        foreach (GameObject g in kapatılacaklar)
-        {
-            g.gameObject.SetActive(false);
-        }
-        artı2uyarı.gameObject.SetActive(false);
-    }
+    void CalculateAverages() 
+    {
+        float sum = 0;
+        float avg5_sum = 0;
+        float avg10_sum = 0;
 
-    #endregion
-    
-    #region Zamanlayıcı Fonksiyonları
-    void Bas() {
-        if (!başladı) { // eğer başlatılmamışsa basılı tutma süresini say
-            başlatmaİçinBasılıTutma = true;
+        for (int i = 0; i < solves.Count(); i++) {
+            Solve solve = solves[i];
+            sum += solve.solveTime;
             
-            zamanlayıcı.color = Color.red;
-        }
-        if (başladı){ // eğer başlatılmışsa zamanlayıcıyı durdur
-            ZamanlayıcıyıDurdur();
-        }
-    }
-    void ZamanlayıcıyıDurdur() {
-        EkranaEkle();
-        başladı = false;
-        başlayabilir = false;
-        
-        zamanlar.Add(zaman);
-        EniyiZamanGüncelle();
-        
-        _eniyiZaman.text = ZamanıSaateÇevir(eniyiZaman);
-        zamanlayıcı.text = ZamanıSaateÇevir(zaman);
-        scrambler.GenerateNewScramble();
-        
-        zamanListesiGüncelle();
-        OrtalamalarıHesapla();
-        
-        string path = Application.persistentDataPath + "/Zamanlar.txt";
-        StreamWriter writer = new StreamWriter(path, true);
-        writer.Write("\n" + zaman.ToString());
-        writer.Close();
-        
+            if (i >= solves.Count() - 5) {
+                avg5_sum += solve.solveTime;
+            }
 
-        
-    }
-    void ZamanlayıcıyıBaşlat(){
-        artı2Kilit = false;
-        dnfKilit = false;
-        zamanlayıcı.color = Color.white;
-        zaman = 0;
-        basılıTutmaSüresi = 0;
-        başladı = true;
-        başlatmaİçinBasılıTutma = false;
-        çözümSayısı++;
-        EkrandanKaldır();
-    }
-    void Çek() {
-        if (!başladı) { // eğer daha başlamadıysa başlama sürecini durdur
-            başlatmaİçinBasılıTutma = false;
-            basılıTutmaSüresi = 0;
-            zamanlayıcı.color = Color.white;
+            if (i >= solves.Count() - 10) {
+                avg10_sum += solve.solveTime;
+            }
         }
-        if (başlayabilir) { // eğer başlatılabilirse başlat
-            ZamanlayıcıyıBaşlat();
+
+        AVG = sum / solves.Count();
+        AVGText.text = ConvertTimeToString(AVG);
+
+        if (solves.Count() >= 5) {
+            AVG5 = avg5_sum / 5;
+            AVG5Text.text = ConvertTimeToString(AVG5);
+        }
+
+        if (solves.Count() >= 10) {
+            AVG10 = avg10_sum / 10;
+            AVG10Text.text = ConvertTimeToString(AVG10);
         }
     }
-    public void DNF()
+    public static string ConvertTimeToString(float time) //ChatGPT!
     {
-        if (dnfKilit) return;
-        zamanlar.RemoveAt(zamanlar.Count - 1);
-        zamanlayıcı.text = "DNF";
-        artı2Kilit = true;
-        zamanListesiGüncelle();
-        EniyiZamanGüncelle();
-        OrtalamalarıHesapla();
-        artı2uyarı.gameObject.SetActive(false);
-        dnfKilit = true; // (gerek yok ama ne olur ne olmaz elde bulunsun)
-
-
-        string path = Application.persistentDataPath + "/Zamanlar.txt";
-        StreamReader reader = new StreamReader(path);
-        string contents = reader.ReadToEnd();
-        string[] temp_zamanlar = contents.Split("\n");
-        reader.Close();
-        foreach (string zaman in temp_zamanlar){
-            Debug.Log(zaman);
-        }
-
-        StreamWriter writer = new StreamWriter(path, false);
-        writer.Write("");
-        writer.Close();
-        writer = new StreamWriter(path, true);
-        for (int i=0; i <= zamanlar.Count -1; i++){
-            writer.Write("\n" + temp_zamanlar[i]);
-        }
-        writer.Close();
-
-    
-    }
-    public void artı2(){
-        if (artı2Kilit) return;
-        float şuankizaman;
-        şuankizaman = zaman;
-        şuankizaman += 2;
-
-        zamanlayıcı.text = ZamanıSaateÇevir(şuankizaman);
-        zamanlar.RemoveAt(zamanlar.Count - 1);
-        zamanlar.Add(şuankizaman);
-
-        artı2uyarı.gameObject.SetActive(true);
-
-
-        string path = Application.persistentDataPath + "/Zamanlar.txt";
-        StreamReader reader = new StreamReader(path);
-        string contents = reader.ReadToEnd();
-        string[] temp_zamanlar = contents.Split("\n");
-        reader.Close();
-
-        StreamWriter writer = new StreamWriter(path, false);
-        writer.Write("");
-        writer.Close();
-        writer = new StreamWriter(path, true);
-        for (int i=0; i <= temp_zamanlar.Count() -2; i++){
-            if (i == 0){
-                writer.Write(temp_zamanlar[i]);
-            }
-            else {
-                writer.Write("\n"+temp_zamanlar[i]);
-            }
-        }
-        writer.Write("\n" + zamanlar[zamanlar.Count() -1]);
-        writer.Close();
-
-        zamanListesiGüncelle();
-        EniyiZamanGüncelle();
-        OrtalamalarıHesapla();
-        artı2Kilit = true;
-    }
-
-    void OrtalamalarıHesapla(){
-        if (zamanlar.Count >= 5) // eğer zaman listesi 5 veya 5 ten fazla ise
-        {
-            ORT5 = Ortalama(SonZamanlarıAl(zamanlar, 5)); // ortalama hesapla
-            ort5Text.text = ZamanıSaateÇevir(ORT5); // ortalamayı ekrana yazdır
-        }
-        if (zamanlar.Count >= 10) // eğer liste 10 ise
-        {
-            ORT10 = Ortalama(SonZamanlarıAl(zamanlar, 10)); // ortalama hesapla
-            ORT10Text.text = ZamanıSaateÇevir(ORT10); // ortalamayı ekrana yazdır
-            // zamanlar.RemoveAt(0); // ilk elemanı sil (gerek yok ama ne olur ne olmaz elde bulunsun)
-        }
-        if (zamanlar.Count == 0){
-            ortText.text = "-";
-        }
-        else{
-            ORT = Ortalama(zamanlar); // ortalama hesapla
-            ortText.text = ZamanıSaateÇevir(ORT); // ortalamayı ekrana yazdır
-        }
-    }
-
-
-    #endregion
-
-    #region Aritmetik Fonksiyonlar
-    float Ortalama(List<float> liste){
-            float toplam = 0;
-            foreach (float i in liste)
-            {
-                toplam += i;
-            }
-            return (float)(toplam / liste.Count);
-        }
-    string ZamanıSaateÇevir(float time) // copilot sağolsun
-    {
-
         int minutes = (int)time / 60;
-        int seconds = (int)time % 60; 
-        int miliseconds = (int)((time - (int)time) * 100); 
+        int seconds = (int)time % 60;
+        int milliseconds = (int)((time - (int)time) * 100);
 
+        string format;
 
-        if (minutes == 0){
-            if (seconds < 10){
-                return string.Format("{0:0}.{1:00}",seconds, miliseconds); // 05.00 ı engellemek için (doğrusu 5.00)
-            }
-            else{
-                return string.Format("{0:00}.{1:00}",seconds, miliseconds);
-            }
+        if (minutes == 0)
+        {
+            format = "{0}.{1:00}";
+            return string.Format(format, seconds, milliseconds);
         }
-        else {
-            if (minutes < 10){
-                return string.Format("{0:0}:{1:00}.{2:00}", minutes, seconds, miliseconds); // 01:10.00 ı engellemek için (doğrusu 1:10.00)
-            }
-
-            else {
-                return string.Format("{0:00}:{1:00}.{2:00}", minutes, seconds, miliseconds);
-            }
+        else
+        {
+            format = "{0}:{1:00}.{2:00}";
+            return string.Format(format, minutes, seconds, milliseconds);
         }
     }
-
-    List<float> SonZamanlarıAl(List<float> liste,int index){
-        List<float> yeniListe = new List<float>();
-        for (int i = Math.Max(0,liste.Count() - index); i < liste.Count(); i++){
-            yeniListe.Add(liste[i]);
+}
+[System.Serializable]
+public class Solve
+{
+    [SerializeField] public float solveTime;
+    [NonSerialized] public string scramble;
+    [NonSerialized] public bool isBestSolve;
+    [NonSerialized] public bool isBelowThreshold;
+    [NonSerialized] public static float threshold = 20;
+    public Solve(float solveTime, string scramble)
+    {
+        this.solveTime = solveTime;
+        this.scramble = scramble;
+        this.isBestSolve = false;
+        if (this.solveTime < threshold){
+            isBelowThreshold = true;
         }
-        return yeniListe;
     }
-
-    // Dictionary<float, string> ListeleriBirleştir(List<float> liste1, List<string> liste2){
-    //     Dictionary<float, string> yeniListe = new Dictionary<float, string>();
-    //     for (int i = 0; i < liste1.Count(); i++){
-    //         yeniListe.Add(
-    //             new object[] {liste1[i], liste2[i]}
-    //         );
-    //     }
-    //     return yeniListe;
-    // }
-
-    #endregion
+    public override string ToString(){
+        return Timer.ConvertTimeToString(this.solveTime) + " " + scramble;
+    }
 }
